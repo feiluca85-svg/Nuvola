@@ -61,6 +61,7 @@ public class MainActivity extends Activity {
                     // Hide immediately on safe pages
                     if (curr.contains("login") || curr.contains("auth") || curr.contains("compiti") || curr.contains("argomenti")) {
                         splash.setVisibility(View.GONE);
+                        CookieManager.getInstance().flush();
                     }
                 }
 
@@ -121,6 +122,12 @@ public class MainActivity extends Activity {
         });
 
         webView.loadUrl("https://nuvola.madisoft.it/login");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        CookieManager.getInstance().flush();
     }
 
     @Override
