@@ -2,20 +2,26 @@ package com.madisoft.nuvolina;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.graphics.Bitmap;
 import android.webkit.CookieManager;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.RelativeLayout;
+import android.widget.ImageView;
+import android.view.View;
 import android.view.ViewGroup;
+import android.graphics.Color;
 
 public class MainActivity extends Activity {
     private WebView webView;
+    private ImageView splash;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        RelativeLayout layout = new RelativeLayout(this);
         
         webView = new WebView(this);
         WebSettings settings = webView.getSettings();
@@ -27,26 +33,17 @@ public class MainActivity extends Activity {
         cookieManager.setAcceptCookie(true);
         cookieManager.setAcceptThirdPartyCookies(webView, true);
 
-        setContentView(webView, new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        layout.addView(webView, new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+        splash = new ImageView(this);
+        splash.setBackgroundColor(Color.parseColor("#C8A2C8"));
+        splash.setImageResource(R.mipmap.ic_launcher);
+        splash.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+        layout.addView(splash, new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+        setContentView(layout);
 
         webView.setWebViewClient(new WebViewClient() {
-            @Override
-            public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                super.onPageStarted(view, url, favicon);
-                if (url != null) {
-                    String lowerUrl = url.toLowerCase();
-                    // Intercettore di Rete: se Nuvola prova ad aprire la Dashboard/Home, la blocchiamo e andiamo sui Compiti
-                    if (lowerUrl.equals("https://nuvola.madisoft.it/") || 
-                        lowerUrl.equals("https://nuvola.madisoft.it") || 
-                        lowerUrl.equals("https://nuvola.madisoft.it/area-tutore/") || 
-                        lowerUrl.equals("https://nuvola.madisoft.it/area-tutore") ||
-                        lowerUrl.contains("/dashboard")) {
-                        view.stopLoading();
-                        view.loadUrl("https://nuvola.madisoft.it/area-tutore/compiti");
-                    }
-                }
-            }
-
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 String url = request.getUrl().toString().toLowerCase();
@@ -59,61 +56,71 @@ public class MainActivity extends Activity {
 
             @Override
             public void onPageFinished(WebView view, String url) {
+                if (url != null) {
+                    String curr = url.toLowerCase();
+                    // Hide immediately on safe pages
+                    if (curr.contains("login") || curr.contains("auth") || curr.contains("compiti") || curr.contains("argomenti")) {
+                        splash.setVisibility(View.GONE);
+                    }
+                }
+
                 String js = "javascript:(function() { " +
-                    // 1. CSS Injection: Nasconde fisicamente i link ancor prima che l'utente possa cliccarli
-                    "if (!window.nuvolaCssInjected) {" +
-                    "  window.nuvolaCssInjected = true;" +
-                    "  var style = document.createElement('style');" +
-                    "  style.innerHTML = " +
-                    "    'a[href*=\"/voti\"], a[href*=\"/assenze\"], a[href*=\"/note\"], a[href*=\"/colloqui\"], a[href*=\"/documenti\"], a[href*=\"/pagamenti\"], a[href*=\"/bacheche\"], a[href*=\"/materiale\"], a[href*=\"/scrutinio\"], a[href*=\"/modulistica\"], a[href*=\"/calendario\"] { display: none !important; opacity: 0 !important; pointer-events: none !important; position: absolute !important; left: -9999px !important; } ' +" +
-                    "    '.app-header-user, .user-profile, .dropdown-menu { display: none !important; }';" +
-                    "  document.head.appendChild(style);" +
-                    "}" +
+                    "function hideUnwanted() {" +
+                    "  var compitiLink = null;" +
+                    "  var menuItems = document.querySelectorAll('li, a, div[role=\"button\"], button, span, div');" +
+                    "  menuItems.forEach(function(item) {" +
+                    "    var text = item.textContent.trim();" +
+                    "    if(text.length > 0 && text.length < 50) {" +
+                    "      var isAllowed = text.indexOf('Compiti') !== -1 || text.indexOf('Argomenti') !== -1 || text.indexOf('Petra') !== -1 || text.indexOf('1B') !== -1;" +
+                    "      var isMenu = text === 'Voti' || text.indexOf('Assenze') !== -1 || text.indexOf('Note') !== -1 || text.indexOf('Calendario') !== -1 || text.indexOf('Colloqui') !== -1 || text.indexOf('Bacheche') !== -1 || text.indexOf('Documenti') !== -1 || text.indexOf('Pagamenti') !== -1 || text.indexOf('Modulistica') !== -1 || text.indexOf('Materiale') !== -1 || text.indexOf('Scrutinio') !== -1 || text === 'Home';" +
+                    "      if(isMenu && !isAllowed) { item.style.display = 'none'; }" +
+                    
+                    "      if(text === 'LUCA FEI' || text === 'LF') {" +
+                    "         var parent = item.closest('a, button, .dropdown, li');" +
+                    "         if(parent) { parent.style.display = 'none'; } else { item.style.display = 'none'; }" +
+                    "      }" +
 
-                    // 2. History Sabotage: Se il sito SPA tenta di cambiare URL ai Voti, lo rimbalziamo sui Compiti
-                    "if (!window.nuvolaHistorySabotaged) {" +
-                    "  window.nuvolaHistorySabotaged = true;" +
-                    "  var originalPushState = history.pushState;" +
-                    "  history.pushState = function(state, title, url) {" +
-                    "    if (url && (url.indexOf('/voti') !== -1 || url.indexOf('/assenze') !== -1 || url.indexOf('dashboard') !== -1 || url.indexOf('/note') !== -1)) {" +
-                    "        url = 'https://nuvola.madisoft.it/area-tutore/compiti';" +
+                    "      if(text.indexOf('Compiti') !== -1 && item.tagName.toLowerCase() === 'a' && item.href && item.href.indexOf('javascript') === -1) {" +
+                    "         compitiLink = item.href;" +
+                    "      }" +
                     "    }" +
-                    "    return originalPushState.apply(this, arguments);" +
-                    "  };" +
-                    "  var originalReplaceState = history.replaceState;" +
-                    "  history.replaceState = function(state, title, url) {" +
-                    "    if (url && (url.indexOf('/voti') !== -1 || url.indexOf('/assenze') !== -1 || url.indexOf('dashboard') !== -1 || url.indexOf('/note') !== -1)) {" +
-                    "        url = 'https://nuvola.madisoft.it/area-tutore/compiti';" +
+                    "  });" +
+                    
+                    "  var currUrl = window.location.href.toLowerCase();" +
+                    "  if (compitiLink && currUrl.indexOf('compiti') === -1 && currUrl.indexOf('argomenti') === -1 && currUrl.indexOf('login') === -1 && currUrl.indexOf('auth') === -1) {" +
+                    "    if (!window.hasRedirectedToCompiti) {" +
+                    "       window.hasRedirectedToCompiti = true;" +
+                    "       window.location.replace(compitiLink);" +
                     "    }" +
-                    "    return originalReplaceState.apply(this, arguments);" +
-                    "  };" +
+                    "  }" +
                     "}" +
-
-                    // 3. Text-based MutationObserver per elementi difficili (es. Nome del tutore o tasti Home)
+                    
+                    "hideUnwanted();" +
                     "if (!window.nuvolaObserverStarted) {" +
                     "  window.nuvolaObserverStarted = true;" +
-                    "  var hideByText = function() {" +
-                    "    document.querySelectorAll('li, a, button, span, div').forEach(function(item) {" +
-                    "      var text = item.textContent.trim();" +
-                    "      if (text.length > 0 && text.length < 50) {" +
-                    "        if (text === 'LUCA FEI' || text === 'LF' || text === 'Voti' || text.indexOf('Assenze') !== -1 || text === 'Home' || text.indexOf('Home') === 0) {" +
-                    "           var parent = item.closest('a, button, li, .dropdown');" +
-                    "           if (parent) { parent.style.display = 'none'; parent.style.opacity = '0'; parent.style.pointerEvents = 'none'; }" +
-                    "           item.style.display = 'none'; item.style.opacity = '0'; item.style.pointerEvents = 'none';" +
-                    "        }" +
-                    "      }" +
-                    "    });" +
-                    "  };" +
-                    "  hideByText();" + // run immediately
-                    "  var observer = new MutationObserver(hideByText);" +
+                    "  var observer = new MutationObserver(function() { hideUnwanted(); });" +
                     "  observer.observe(document.documentElement, { childList: true, subtree: true });" +
+                    "  setInterval(function() {" +
+                    "    var curr = window.location.href.toLowerCase();" +
+                    "    if(curr.indexOf('/voti')!==-1 || curr.indexOf('/assenze')!==-1 || curr.indexOf('/note')!==-1 || curr.indexOf('/pagamenti')!==-1 || curr.indexOf('/colloqui')!==-1 || curr.indexOf('/documenti')!==-1) {" +
+                    "      window.location.replace('https://nuvola.madisoft.it/');" +
+                    "    }" +
+                    "  }, 1000);" +
                     "}" +
                 "})();";
                 view.evaluateJavascript(js, null);
+
+                // Ultimate failsafe: unblock UI after 2.5 seconds regardless of what happens
+                view.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (splash != null) splash.setVisibility(View.GONE);
+                    }
+                }, 2500);
             }
         });
 
-        webView.loadUrl("https://nuvola.madisoft.it/area-tutore/compiti");
+        webView.loadUrl("https://nuvola.madisoft.it/login");
     }
 
     @Override
