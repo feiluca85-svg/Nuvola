@@ -1,40 +1,70 @@
 package com.madisoft.nuvolina;
 
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Bundle;
+import android.webkit.CookieManager;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.RelativeLayout;
+import android.widget.ImageView;
+import android.view.View;
+import android.view.ViewGroup;
+import android.graphics.Color;
 
 public class MainActivity extends Activity {
     private WebView webView;
+    private ImageView splash;
 
-    @SuppressLint("SetJavaScriptEnabled")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        RelativeLayout layout = new RelativeLayout(this);
+        
         webView = new WebView(this);
-        setContentView(webView);
+        WebSettings settings = webView.getSettings();
+        settings.setJavaScriptEnabled(true);
+        settings.setDomStorageEnabled(true);
+        settings.setDatabaseEnabled(true);
+        
+        CookieManager cookieManager = CookieManager.getInstance();
+        cookieManager.setAcceptCookie(true);
+        cookieManager.setAcceptThirdPartyCookies(webView, true);
 
-        WebSettings webSettings = webView.getSettings();
-        webSettings.setJavaScriptEnabled(true);
-        webSettings.setDomStorageEnabled(true);
+        layout.addView(webView, new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+        splash = new ImageView(this);
+        splash.setBackgroundColor(Color.parseColor("#C8A2C8"));
+        splash.setImageResource(R.mipmap.ic_launcher);
+        splash.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+        layout.addView(splash, new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+
+        setContentView(layout);
 
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 String url = request.getUrl().toString().toLowerCase();
                 if (url.contains("/voti") || url.contains("/assenze") || url.contains("/note") || 
-                    url.contains("/pagamenti") || url.contains("/colloqui") || url.contains("/documenti")) {
-                    return true; // Block navigation
+                    url.contains("/pagamenti") || url.contains("/colloqui") || url.contains("/documenti") || url.contains("/bacheche")) {
+                    return true; 
                 }
                 return false;
             }
 
             @Override
             public void onPageFinished(WebView view, String url) {
+                if (url != null) {
+                    String curr = url.toLowerCase();
+                    if (curr.contains("/login") || curr.contains("/compiti") || curr.contains("/argomenti")) {
+                        splash.setVisibility(View.GONE);
+                    } else {
+                        splash.setVisibility(View.VISIBLE);
+                    }
+                }
+
                 String js = "javascript:(function() { " +
                     "function hideUnwanted() {" +
                     "  var compitiLink = null;" +
