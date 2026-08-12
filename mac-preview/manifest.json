@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "Nuvola WP8 Theme",
+  "version": "1.0",
+  "description": "Forza lo stile Windows Phone 8 sul registro elettronico Nuvola.",
+  "permissions": ["storage"],
+  "content_scripts": [
+    {
+      "matches": ["*://*.madisoft.it/*", "*://nuvola.madisoft.it/*"],
+      "css": ["wp8-theme.css"],
+      "js": ["content.js"],
+      "run_at": "document_end",
+      "all_frames": true
+    }
+  ]
+}

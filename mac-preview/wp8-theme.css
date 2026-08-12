@@ -1,0 +1,313 @@
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&display=swap');
+
+:root {
+  --wp8-bg: #000000;
+  --wp8-text: #ffffff;
+  --wp8-accent: #f09609;
+  --wp8-font: "Segoe UI", "Open Sans", -apple-system, sans-serif;
+}
+
+html.wp8-light-theme, html.wp8-light-theme body {
+  --wp8-bg: #ffffff;
+  --wp8-text: #000000;
+}
+
+/* ====== 1. GLOBAL BASE ====== */
+html, body {
+  background-color: var(--wp8-bg) !important;
+  color: var(--wp8-text) !important;
+  font-family: var(--wp8-font) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+* {
+  font-family: var(--wp8-font) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+}
+
+/* ====== 2. WP8 START SCREEN OVERLAY ====== */
+#wp8-start-screen {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  background-color: var(--wp8-bg) !important;
+  z-index: 999990 !important;
+  overflow-y: auto !important;
+  padding: 20px 16px 100px 16px !important;
+  box-sizing: border-box !important;
+}
+
+.wp8-start-header {
+  display: flex !important;
+  justify-content: space-between !important;
+  align-items: flex-end !important;
+  margin-bottom: 24px !important;
+  padding-top: 10px !important;
+}
+
+.wp8-start-title {
+  font-size: 40px !important;
+  font-weight: 200 !important;
+  color: var(--wp8-text) !important;
+  letter-spacing: -0.03em !important;
+  text-transform: lowercase !important;
+  margin: 0 !important;
+}
+
+.wp8-start-clock {
+  font-size: 14px !important;
+  color: #888888 !important;
+  font-weight: 400 !important;
+}
+
+/* Tiles Grid */
+.wp8-tiles-grid {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+  width: 100% !important;
+  max-width: 500px !important;
+  margin: 0 auto !important;
+}
+
+/* Individual Tile */
+.wp8-start-tile {
+  background-color: var(--wp8-accent) !important;
+  color: #ffffff !important;
+  box-sizing: border-box !important;
+  padding: 14px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: space-between !important;
+  cursor: pointer !important;
+  position: relative !important;
+  overflow: hidden !important;
+  transition: transform 0.12s ease, filter 0.12s ease !important;
+  user-select: none !important;
+  border: none !important;
+}
+
+.wp8-start-tile:active {
+  transform: scale(0.95) !important;
+  filter: brightness(0.85) !important;
+}
+
+/* Tile sizes */
+.wp8-tile-wide {
+  width: 100% !important;
+  height: 115px !important;
+}
+
+.wp8-tile-medium {
+  width: calc(50% - 5px) !important;
+  height: 115px !important;
+}
+
+.wp8-start-tile .tile-icon-wrapper {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  flex-grow: 1 !important;
+}
+
+.wp8-start-tile .tile-icon {
+  font-size: 36px !important;
+  color: #ffffff !important;
+  line-height: 1 !important;
+}
+
+.wp8-start-tile .tile-label {
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #ffffff !important;
+  text-transform: lowercase !important;
+  align-self: flex-start !important;
+  margin-top: 4px !important;
+}
+
+/* ====== 3. BACK BAR ON SUBPAGES ====== */
+#wp8-back-bar {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 48px !important;
+  background-color: #000000 !important;
+  border-bottom: 1px solid #222222 !important;
+  z-index: 999980 !important;
+  display: flex !important;
+  align-items: center !important;
+  padding: 0 16px !important;
+  box-sizing: border-box !important;
+}
+
+#wp8-back-btn {
+  background: transparent !important;
+  border: none !important;
+  color: var(--wp8-accent) !important;
+  font-size: 16px !important;
+  font-weight: 400 !important;
+  cursor: pointer !important;
+  text-transform: lowercase !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 0 !important;
+}
+
+/* Push page content down when back bar is active */
+body.wp8-in-subpage {
+  padding-top: 55px !important;
+}
+
+/* ====== 4. SUBPAGE STYLING (WP8 METRO SUBPAGES) ====== */
+body.wp8-in-subpage, 
+body.wp8-in-subpage #page-wrapper, 
+body.wp8-in-subpage .wrapper, 
+body.wp8-in-subpage .main-container, 
+body.wp8-in-subpage .content-wrapper,
+body.wp8-in-subpage main,
+body.wp8-in-subpage section,
+body.wp8-in-subpage div {
+  background-color: var(--wp8-bg) !important;
+  color: var(--wp8-text) !important;
+}
+
+body.wp8-in-subpage h1, 
+body.wp8-in-subpage h2, 
+body.wp8-in-subpage h3,
+body.wp8-in-subpage .page-header,
+body.wp8-in-subpage [class*="title"] {
+  color: var(--wp8-accent) !important;
+  font-weight: 300 !important;
+  text-transform: lowercase !important;
+  font-size: 28px !important;
+  letter-spacing: -0.02em !important;
+  margin-top: 15px !important;
+  margin-bottom: 15px !important;
+}
+
+/* Subpage Tables (Voti, Assenze, Note) styled as WP8 Metro Blocks */
+body.wp8-in-subpage table, 
+body.wp8-in-subpage .table {
+  background-color: transparent !important;
+  width: 100% !important;
+  border-collapse: separate !important;
+  border-spacing: 0 8px !important;
+}
+
+body.wp8-in-subpage tr {
+  background-color: #141414 !important;
+  border-left: 4px solid var(--wp8-accent) !important;
+  transition: background-color 0.15s ease !important;
+}
+
+body.wp8-in-subpage tr:active {
+  background-color: var(--wp8-accent) !important;
+}
+
+body.wp8-in-subpage th {
+  color: var(--wp8-accent) !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  text-transform: lowercase !important;
+  border: none !important;
+  padding: 10px !important;
+  background-color: transparent !important;
+}
+
+body.wp8-in-subpage td {
+  color: #ffffff !important;
+  border: none !important;
+  padding: 12px 10px !important;
+  font-size: 15px !important;
+}
+
+/* Grade badges / Marks styled as WP8 Accent Blocks */
+body.wp8-in-subpage [class*="voto"], 
+body.wp8-in-subpage [class*="grade"], 
+body.wp8-in-subpage [class*="badge"],
+body.wp8-in-subpage [class*="mark"] {
+  background-color: var(--wp8-accent) !important;
+  color: #ffffff !important;
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  padding: 6px 12px !important;
+  border-radius: 0 !important;
+  display: inline-block !important;
+}
+
+/* Subpage Card Items */
+body.wp8-in-subpage .card, 
+body.wp8-in-subpage .panel, 
+body.wp8-in-subpage .box,
+body.wp8-in-subpage .item {
+  background-color: #141414 !important;
+  border-left: 4px solid var(--wp8-accent) !important;
+  padding: 14px !important;
+  margin-bottom: 10px !important;
+  color: #ffffff !important;
+}
+
+body.wp8-in-subpage .card *, 
+body.wp8-in-subpage .panel *, 
+body.wp8-in-subpage .box *,
+body.wp8-in-subpage .item * {
+  color: #ffffff !important;
+  background-color: transparent !important;
+}
+
+/* ====== 5. FLOATING PALETTE CHOOSER ====== */
+#wp8-palette-chooser {
+  position: fixed !important;
+  bottom: 15px !important;
+  right: 15px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  z-index: 2147483647 !important;
+  background: rgba(10, 10, 10, 0.95) !important;
+  padding: 10px !important;
+  border: 1px solid #444 !important;
+}
+
+.wp8-color-grid {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  width: 110px !important;
+  gap: 4px !important;
+  margin-top: 6px !important;
+}
+
+.wp8-color-swatch {
+  width: 28px !important;
+  height: 28px !important;
+  cursor: pointer !important;
+  border: 2px solid transparent !important;
+}
+
+.wp8-color-swatch:hover {
+  border-color: #ffffff !important;
+}
+
+.wp8-chooser-title {
+  color: #ffffff !important;
+  font-size: 10px !important;
+  text-transform: uppercase !important;
+}
+
+.wp8-theme-toggle {
+  background-color: #222222 !important;
+  color: #ffffff !important;
+  border: 1px solid #555555 !important;
+  padding: 3px 6px !important;
+  font-size: 10px !important;
+  cursor: pointer !important;
+  width: 100% !important;
+  margin-top: 4px !important;
+}

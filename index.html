@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Nuvola</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Segoe UI", -apple-system, sans-serif; }
+    body {
+      background-color: #000000;
+      color: #ffffff;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 20px;
+    }
+    .wp8-tile-btn {
+      background-color: #f09609;
+      color: #ffffff;
+      width: 140px;
+      height: 140px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 20px;
+      text-decoration: none;
+      border-radius: 0;
+      transition: transform 0.1s ease;
+    }
+    .wp8-tile-btn:active { transform: scale(0.95); }
+    .wp8-tile-btn img { width: 70px; height: 70px; }
+    .wp8-tile-btn span { margin-top: 10px; font-weight: 600; text-transform: lowercase; font-size: 14px; }
+    h1 { font-weight: 200; font-size: 32px; text-transform: lowercase; margin-bottom: 8px; letter-spacing: -1px; }
+    p { color: #888888; font-size: 14px; }
+  </style>
+</head>
+<body>
+
+  <a href="https://nuvola.madisoft.it/login" class="wp8-tile-btn" id="nuvola-btn">
+    <img src="icon-192.png" alt="Nuvola">
+    <span>nuvola</span>
+  </a>
+
+  <h1>nuvola</h1>
+  <p id="status-text">Apertura Nuvola in corso...</p>
+
+  <script>
+    // Register Service Worker for PWA
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+
+    // Auto redirect to Nuvola login
+    setTimeout(() => {
+      window.location.href = "https://nuvola.madisoft.it/login";
+    }, 600);
+  </script>
+</body>
+</html>
