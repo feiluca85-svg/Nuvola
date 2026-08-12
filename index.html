@@ -4,11 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Nuvola</title>
-  <link id="manifest-link" rel="manifest" href="">
-  <meta name="theme-color" content="#000000">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#b70138">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link id="apple-icon" rel="apple-touch-icon" href="">
+  <link rel="apple-touch-icon" href="icon-192.png">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Segoe UI", -apple-system, sans-serif; }
     body {
@@ -28,33 +28,17 @@
     .wp8-tile-preview {
       width: 140px;
       height: 140px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
       margin-bottom: 30px;
       box-shadow: 0px 4px 15px rgba(0,0,0,0.5);
     }
-    
-    /* Palette dei colori */
-    .palette {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 30px;
-      max-width: 250px;
+    .wp8-tile-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
-    .color-btn {
-      width: 40px;
-      height: 40px;
-      border: 2px solid transparent;
-      cursor: pointer;
-      transition: transform 0.1s;
-    }
-    .color-btn:active { transform: scale(0.9); }
-    .color-btn.selected { border-color: white; }
 
     #install-btn {
+      background-color: #b70138;
       color: white;
       border: none;
       padding: 14px 35px;
@@ -68,6 +52,7 @@
     #loading-state {
       display: none;
       font-weight: bold;
+      color: #b70138;
       font-size: 18px;
       margin-top: 20px;
     }
@@ -75,149 +60,42 @@
 </head>
 <body>
 
-  <!-- Tile Preview in CSS/SVG instead of image -->
+  <!-- Mostriamo la vera icona statica -->
   <div class="wp8-tile-preview" id="tile-preview">
-    <img src="icon-transparent.png" alt="Nuvola" style="width:80%; height:auto; object-fit:contain;">
+    <img src="icon-192.png" alt="Nuvola">
   </div>
 
   <h1 id="main-title">nuvola app</h1>
-  <p id="main-desc">Scegli un colore e poi clicca Installa.</p>
-
-  <div class="palette" id="palette-container"></div>
+  <p id="main-desc">Attendi il caricamento...</p>
 
   <button id="install-btn">Installa l'App</button>
   <div id="loading-state">Apertura Nuvola...</div>
 
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js').catch(() => {});
+      navigator.serviceWorker.register('sw.js?v=3').catch(() => {});
     }
 
-    const wp8Colors = {
-      'originale': '#b70138',
-      'orange': '#f09609',
-      'cyan': '#1ba1e2',
-      'magenta': '#ff0097',
-      'lime': '#8cbf26',
-      'red': '#e51400',
-      'cobalt': '#0050ef',
-      'emerald': '#00aba9',
-      'violet': '#aa00ff'
-    };
-
-    // Get color from URL or default to originale
-    const urlParams = new URLSearchParams(window.location.search);
-    const currentColorName = urlParams.get('color') || 'originale';
-    const currentColorHex = wp8Colors[currentColorName] || wp8Colors['originale'];
-
-    const tilePreview = document.getElementById('tile-preview');
-    const installBtn = document.getElementById('install-btn');
-    const loadingState = document.getElementById('loading-state');
-    const mainDesc = document.getElementById('main-desc');
-
-    // Funzione per disegnare l'icona e creare il manifest al volo
-    async function setupAppManifest() {
-      tilePreview.style.backgroundColor = currentColorHex;
-      installBtn.style.backgroundColor = currentColorHex;
-      loadingState.style.color = currentColorHex;
-
-      // Crea le icone in base64 tramite un canvas invisibile
-      const getIconDataUrl = (size) => {
-        return new Promise((resolve) => {
-          const canvas = document.createElement('canvas');
-          canvas.width = size;
-          canvas.height = size;
-          const ctx = canvas.getContext('2d');
-          
-          // Sfondo colorato
-          ctx.fillStyle = currentColorHex;
-          ctx.fillRect(0, 0, size, size);
-          
-          // Disegna la nuvola
-          const img = new Image();
-          img.src = 'icon-transparent.png'; // Carichiamo l'immagine originale trasparente senza testo
-          img.onload = () => {
-            // L'immagine originale è 512x400 (perché abbiamo tagliato il testo in basso)
-            // La disegniamo centrata sul canvas
-            const imgRatio = img.width / img.height;
-            let drawWidth = size * 0.8;
-            let drawHeight = drawWidth / imgRatio;
-            
-            // Centriamo verticalmente e orizzontalmente
-            const dx = (size - drawWidth) / 2;
-            const dy = (size - drawHeight) / 2;
-            
-            ctx.drawImage(img, dx, dy, drawWidth, drawHeight);
-            resolve(canvas.toDataURL('image/png'));
-          };
-          img.onerror = () => resolve(canvas.toDataURL('image/png'));
-        });
-      };
-
-      const icon192 = await getIconDataUrl(192);
-      const icon512 = await getIconDataUrl(512);
-
-      // Aggiorna apple touch icon
-      document.getElementById('apple-icon').href = icon192;
-
-      // Crea il manifest json dinamico
-      const manifest = {
-        "name": "Nuvola",
-        "short_name": "Nuvola",
-        "description": "Nuvola WP8",
-        "start_url": "./index.html?color=" + currentColorName,
-        "display": "standalone",
-        "background_color": "#000000",
-        "theme_color": currentColorHex,
-        "icons": [
-          { "src": icon192, "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
-          { "src": icon512, "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
-        ]
-      };
-
-      const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
-      const manifestURL = URL.createObjectURL(blob);
-      document.getElementById('manifest-link').href = manifestURL;
-    }
-
-    window.onload = async () => {
-      // 1. Costruisci la palette
-      const paletteContainer = document.getElementById('palette-container');
-      for (const [name, hex] of Object.entries(wp8Colors)) {
-        const btn = document.createElement('div');
-        btn.className = 'color-btn' + (name === currentColorName ? ' selected' : '');
-        btn.style.backgroundColor = hex;
-        btn.onclick = () => {
-          // Ricarica la pagina col nuovo colore così Chrome rigenera il manifest PWA
-          window.location.href = '?color=' + name;
-        };
-        paletteContainer.appendChild(btn);
-      }
-
-      // 2. Siamo già dentro l'app installata?
+    window.onload = () => {
+      // 1. Siamo già dentro l'app installata?
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
       if (isStandalone) {
-        document.getElementById('palette-container').style.display = 'none';
-        mainDesc.style.display = 'none';
-        installBtn.style.display = 'none';
-        loadingState.style.display = 'block';
-        loadingState.style.color = currentColorHex;
+        document.getElementById('main-desc').style.display = 'none';
+        document.getElementById('install-btn').style.display = 'none';
+        document.getElementById('loading-state').style.display = 'block';
         
-        // Setup icona (solo visivo)
-        tilePreview.style.backgroundColor = currentColorHex;
-        
-        // Vai a Nuvola
         setTimeout(() => {
           window.location.replace("https://nuvola.madisoft.it/login");
-        }, 500);
+        }, 300);
         return;
       }
 
-      // 3. Prepariamo manifest dinamico se siamo nel browser
-      await setupAppManifest();
-
-      // GESTIONE INSTALLAZIONE BROWSER
+      // 2. Siamo nel browser
+      document.getElementById('main-desc').innerText = "Clicca il pulsante in basso per installare l'app.";
+      
       let deferredPrompt;
+      const installBtn = document.getElementById('install-btn');
+
       window.addEventListener('beforeinstallprompt', (e) => {
         e.preventDefault();
         deferredPrompt = e;
@@ -230,17 +108,16 @@
           const { outcome } = await deferredPrompt.userChoice;
           if (outcome === 'accepted') {
             installBtn.style.display = 'none';
-            paletteContainer.style.display = 'none';
-            mainDesc.innerText = "App installata! Apri la tua schermata Home.";
+            document.getElementById('main-desc').innerText = "App installata! Apri la tua schermata Home.";
           }
           deferredPrompt = null;
         }
       });
       
-      // Fallback per chi non riceve l'evento (es. vecchi browser)
+      // Fallback per chi non riceve l'evento
       setTimeout(() => {
         if (installBtn.style.display === 'none') {
-           mainDesc.innerText = "Usa il menu del browser (3 puntini / Condividi) e scegli 'Aggiungi a schermata Home'.";
+           document.getElementById('main-desc').innerText = "Usa il menu del browser (3 puntini in alto a destra / Condividi) e scegli 'Aggiungi a schermata Home'.";
         }
       }, 2000);
     };
