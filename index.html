@@ -31,38 +31,106 @@
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      margin-bottom: 20px;
+      margin-bottom: 30px;
       text-decoration: none;
       border-radius: 0;
-      transition: transform 0.1s ease;
+      box-shadow: 0px 4px 15px rgba(0,0,0,0.5);
     }
-    .wp8-tile-btn:active { transform: scale(0.95); }
     .wp8-tile-btn img { width: 70px; height: 70px; }
     .wp8-tile-btn span { margin-top: 10px; font-weight: 600; text-transform: lowercase; font-size: 14px; }
-    h1 { font-weight: 200; font-size: 32px; text-transform: lowercase; margin-bottom: 8px; letter-spacing: -1px; }
-    p { color: #888888; font-size: 14px; }
+    h1 { font-weight: 200; font-size: 32px; text-transform: lowercase; margin-bottom: 10px; letter-spacing: -1px; }
+    p { color: #888888; font-size: 15px; margin-bottom: 30px; max-width: 300px; line-height: 1.4; }
+    
+    #install-btn {
+      background-color: #f09609;
+      color: white;
+      border: none;
+      padding: 14px 35px;
+      font-size: 18px;
+      font-weight: 600;
+      border-radius: 2px;
+      cursor: pointer;
+      display: none; /* Nascosto finchè Chrome non dà l'ok */
+      text-transform: uppercase;
+    }
+    
+    #loading-state {
+      display: none;
+      color: #f09609;
+      font-weight: bold;
+      font-size: 18px;
+      margin-top: 20px;
+    }
   </style>
 </head>
 <body>
 
-  <a href="https://nuvola.madisoft.it/login" class="wp8-tile-btn" id="nuvola-btn">
+  <div class="wp8-tile-btn" id="nuvola-btn">
     <img src="icon-192.png" alt="Nuvola">
     <span>nuvola</span>
-  </a>
+  </div>
 
-  <h1>nuvola</h1>
-  <p id="status-text">Apertura Nuvola in corso...</p>
+  <h1 id="main-title">nuvola app</h1>
+  <p id="main-desc">Analisi sistema in corso...</p>
+
+  <button id="install-btn">Installa l'App</button>
+  <div id="loading-state">Apertura Nuvola in corso...</div>
 
   <script>
-    // Register Service Worker for PWA
+    // 1. REGISTRAZIONE SERVICE WORKER
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.register('sw.js').catch(() => {});
     }
 
-    // Auto redirect to Nuvola login
-    setTimeout(() => {
-      window.location.href = "https://nuvola.madisoft.it/login";
-    }, 600);
+    // 2. LOGICA DI INSTALLAZIONE E REDIRECT
+    window.onload = () => {
+      // Controllo se l'app è aperta dalla Home Screen (standalone)
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+      
+      if (isStandalone) {
+        // L'app è già installata e aperta dalla Home!
+        document.getElementById('main-desc').style.display = 'none';
+        document.getElementById('install-btn').style.display = 'none';
+        document.getElementById('loading-state').style.display = 'block';
+        
+        // Vado istantaneamente alla pagina di login reale
+        window.location.replace("https://nuvola.madisoft.it/login");
+      } else {
+        // L'app è stata aperta nel browser web, dobbiamo farla installare!
+        document.getElementById('main-desc').innerText = "Clicca il pulsante in basso per installare l'app nativa sul tuo dispositivo.";
+        
+        let deferredPrompt;
+        const installBtn = document.getElementById('install-btn');
+
+        // Intercetta l'ok di Chrome per l'installazione
+        window.addEventListener('beforeinstallprompt', (e) => {
+          e.preventDefault();
+          deferredPrompt = e;
+          // Mostra il pulsante "Installa"
+          installBtn.style.display = 'block';
+        });
+
+        // Click sul pulsante "Installa"
+        installBtn.addEventListener('click', async () => {
+          if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+              installBtn.style.display = 'none';
+              document.getElementById('main-desc').innerText = "Installazione completata! Torna alla schermata Home del telefono e apri la nuova icona Nuvola WP8.";
+            }
+            deferredPrompt = null;
+          }
+        });
+        
+        // Fallback per iPhone / Safari o se Chrome non fa scattare l'evento
+        setTimeout(() => {
+          if (installBtn.style.display === 'none') {
+             document.getElementById('main-desc').innerText = "Apri il menu del browser (3 puntini in alto a destra) e tocca 'Aggiungi a schermata Home' / 'Installa App'.";
+          }
+        }, 1500);
+      }
+    };
   </script>
 </body>
 </html>
