@@ -94,6 +94,7 @@
     }
 
     const wp8Colors = {
+      'originale': '#b70138',
       'orange': '#f09609',
       'cyan': '#1ba1e2',
       'magenta': '#ff0097',
@@ -104,10 +105,10 @@
       'violet': '#aa00ff'
     };
 
-    // Get color from URL or default to orange
+    // Get color from URL or default to originale
     const urlParams = new URLSearchParams(window.location.search);
-    const currentColorName = urlParams.get('color') || 'orange';
-    const currentColorHex = wp8Colors[currentColorName] || wp8Colors['orange'];
+    const currentColorName = urlParams.get('color') || 'originale';
+    const currentColorHex = wp8Colors[currentColorName] || wp8Colors['originale'];
 
     const tilePreview = document.getElementById('tile-preview');
     const installBtn = document.getElementById('install-btn');
