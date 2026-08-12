@@ -17,6 +17,18 @@ public class MainActivity extends Activity {
     private WebView webView;
     private ImageView splash;
 
+    public class WebAppInterface {
+        @android.webkit.JavascriptInterface
+        public void hideSplash() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (splash != null) splash.setVisibility(View.GONE);
+                }
+            });
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,6 +44,8 @@ public class MainActivity extends Activity {
         CookieManager cookieManager = CookieManager.getInstance();
         cookieManager.setAcceptCookie(true);
         cookieManager.setAcceptThirdPartyCookies(webView, true);
+
+        webView.addJavascriptInterface(new WebAppInterface(), "Android");
 
         layout.addView(webView, new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
@@ -56,15 +70,6 @@ public class MainActivity extends Activity {
 
             @Override
             public void onPageFinished(WebView view, String url) {
-                if (url != null) {
-                    String curr = url.toLowerCase();
-                    if (curr.contains("/login") || curr.contains("/compiti") || curr.contains("/argomenti")) {
-                        splash.setVisibility(View.GONE);
-                    } else {
-                        splash.setVisibility(View.VISIBLE);
-                    }
-                }
-
                 String js = "javascript:(function() { " +
                     "function hideUnwanted() {" +
                     "  var compitiLink = null;" +
@@ -94,6 +99,10 @@ public class MainActivity extends Activity {
                     "       window.location.replace(compitiLink);" +
                     "    }" +
                     "  }" +
+                    
+                    "  if (currUrl.indexOf('/login') !== -1 || currUrl.indexOf('/compiti') !== -1 || currUrl.indexOf('/argomenti') !== -1) {" +
+                    "    if (typeof Android !== 'undefined') { Android.hideSplash(); }" +
+                    "  }" +
                     "}" +
                     
                     "hideUnwanted();" +
@@ -107,6 +116,7 @@ public class MainActivity extends Activity {
                     "      window.location.replace('https://nuvola.madisoft.it/');" +
                     "    }" +
                     "  }, 1000);" +
+                    "  setTimeout(function() { if (typeof Android !== 'undefined') { Android.hideSplash(); } }, 2500);" +
                     "}" +
                 "})();";
                 view.evaluateJavascript(js, null);
