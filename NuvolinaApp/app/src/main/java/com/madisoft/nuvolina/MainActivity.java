@@ -36,15 +36,29 @@ public class MainActivity extends Activity {
             @Override
             public void onPageFinished(WebView view, String url) {
                 String js = "javascript:(function() { " +
-                    "var menuItems = document.querySelectorAll('li, a.menu-item, .nav-item, .sidebar-menu-item, div[role=\"button\"]');" +
-                    "menuItems.forEach(function(item) {" +
-                    "  var text = item.textContent.trim();" +
-                    "  if(text.length > 0 && text.length < 50) {" +
-                    "    var isAllowed = text.indexOf('Compiti') !== -1 || text.indexOf('Argomenti') !== -1 || text.indexOf('Petra') !== -1 || text.indexOf('1B') !== -1;" +
-                    "    var isMenu = text.indexOf('Voti') !== -1 || text.indexOf('Assenze') !== -1 || text.indexOf('Note') !== -1 || text.indexOf('Calendario') !== -1 || text.indexOf('Colloqui') !== -1 || text.indexOf('Bacheche') !== -1 || text.indexOf('Documenti') !== -1 || text.indexOf('Pagamenti') !== -1 || text.indexOf('Modulistica') !== -1 || text.indexOf('Materiale') !== -1;" +
-                    "    if(isMenu && !isAllowed) { item.style.display = 'none'; }" +
-                    "  }" +
-                    "});" +
+                    "function hideUnwanted() {" +
+                    "  var menuItems = document.querySelectorAll('li, a, div[role=\"button\"]');" +
+                    "  menuItems.forEach(function(item) {" +
+                    "    var text = item.textContent.trim();" +
+                    "    if(text.length > 0 && text.length < 50) {" +
+                    "      var isAllowed = text.indexOf('Compiti') !== -1 || text.indexOf('Argomenti') !== -1 || text.indexOf('Petra') !== -1 || text.indexOf('1B') !== -1;" +
+                    "      var isMenu = text.indexOf('Voti') !== -1 || text.indexOf('Assenze') !== -1 || text.indexOf('Note') !== -1 || text.indexOf('Calendario') !== -1 || text.indexOf('Colloqui') !== -1 || text.indexOf('Bacheche') !== -1 || text.indexOf('Documenti') !== -1 || text.indexOf('Pagamenti') !== -1 || text.indexOf('Modulistica') !== -1 || text.indexOf('Materiale') !== -1 || text.indexOf('Scrutinio') !== -1 || text.indexOf('Home') !== -1;" +
+                    "      if(isMenu && !isAllowed) { item.style.display = 'none'; }" +
+                    "    }" +
+                    "  });" +
+                    "}" +
+                    "hideUnwanted();" +
+                    "if (!window.nuvolaObserverStarted) {" +
+                    "  window.nuvolaObserverStarted = true;" +
+                    "  var observer = new MutationObserver(function() { hideUnwanted(); });" +
+                    "  observer.observe(document.documentElement, { childList: true, subtree: true });" +
+                    "  setInterval(function() {" +
+                    "    var curr = window.location.href.toLowerCase();" +
+                    "    if(curr.indexOf('/voti')!==-1 || curr.indexOf('/assenze')!==-1 || curr.indexOf('/note')!==-1 || curr.indexOf('/pagamenti')!==-1 || curr.indexOf('/colloqui')!==-1 || curr.indexOf('/documenti')!==-1) {" +
+                    "      window.location.replace('https://nuvola.madisoft.it/login');" +
+                    "    }" +
+                    "  }, 1000);" +
+                    "}" +
                 "})();";
                 view.evaluateJavascript(js, null);
             }
