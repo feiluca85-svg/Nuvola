@@ -17,25 +17,13 @@ public class MainActivity extends Activity {
     private WebView webView;
     private ImageView splash;
 
-    public class WebAppInterface {
-        @android.webkit.JavascriptInterface
-        public void hideSplash() {
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    if (splash != null) splash.setVisibility(View.GONE);
-                }
-            });
-        }
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         
         RelativeLayout layout = new RelativeLayout(this);
         
-        webView = new WebView(this);
+        WebView webView = new WebView(this);
         WebSettings settings = webView.getSettings();
         settings.setJavaScriptEnabled(true);
         settings.setDomStorageEnabled(true);
@@ -44,8 +32,6 @@ public class MainActivity extends Activity {
         CookieManager cookieManager = CookieManager.getInstance();
         cookieManager.setAcceptCookie(true);
         cookieManager.setAcceptThirdPartyCookies(webView, true);
-
-        webView.addJavascriptInterface(new WebAppInterface(), "Android");
 
         layout.addView(webView, new RelativeLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
 
@@ -70,6 +56,14 @@ public class MainActivity extends Activity {
 
             @Override
             public void onPageFinished(WebView view, String url) {
+                if (url != null) {
+                    String curr = url.toLowerCase();
+                    // Hide immediately on safe pages
+                    if (curr.contains("login") || curr.contains("auth") || curr.contains("compiti") || curr.contains("argomenti")) {
+                        splash.setVisibility(View.GONE);
+                    }
+                }
+
                 String js = "javascript:(function() { " +
                     "function hideUnwanted() {" +
                     "  var compitiLink = null;" +
@@ -93,15 +87,11 @@ public class MainActivity extends Activity {
                     "  });" +
                     
                     "  var currUrl = window.location.href.toLowerCase();" +
-                    "  if (compitiLink && currUrl.indexOf('/compiti') === -1 && currUrl.indexOf('/argomenti') === -1 && currUrl.indexOf('login') === -1) {" +
+                    "  if (compitiLink && currUrl.indexOf('compiti') === -1 && currUrl.indexOf('argomenti') === -1 && currUrl.indexOf('login') === -1 && currUrl.indexOf('auth') === -1) {" +
                     "    if (!window.hasRedirectedToCompiti) {" +
                     "       window.hasRedirectedToCompiti = true;" +
                     "       window.location.replace(compitiLink);" +
                     "    }" +
-                    "  }" +
-                    
-                    "  if (currUrl.indexOf('/login') !== -1 || currUrl.indexOf('/compiti') !== -1 || currUrl.indexOf('/argomenti') !== -1) {" +
-                    "    if (typeof Android !== 'undefined') { Android.hideSplash(); }" +
                     "  }" +
                     "}" +
                     
@@ -116,16 +106,23 @@ public class MainActivity extends Activity {
                     "      window.location.replace('https://nuvola.madisoft.it/');" +
                     "    }" +
                     "  }, 1000);" +
-                    "  setTimeout(function() { if (typeof Android !== 'undefined') { Android.hideSplash(); } }, 2500);" +
                     "}" +
                 "})();";
                 view.evaluateJavascript(js, null);
+
+                // Ultimate failsafe: unblock UI after 2.5 seconds regardless of what happens
+                view.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (splash != null) splash.setVisibility(View.GONE);
+                    }
+                }, 2500);
             }
         });
 
         webView.loadUrl("https://nuvola.madisoft.it/login");
     }
-
+}
     @Override
     public void onBackPressed() {
         if (webView.canGoBack()) {
